@@ -35,6 +35,7 @@ k := kronk.New(
     natsAdapter.NewMS(natsConn),
     redisAdapter.NewLocker(redisConn),
     cron.NewScheduler(),
+    logger,
     kronk.Config{
         DefaultLockExp:     time.Second,
         SyncMessageChannel: "sync-kronk",
