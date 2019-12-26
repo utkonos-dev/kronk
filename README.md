@@ -53,6 +53,8 @@ if err := k.Start(); err != nil {
 
 ### 4. Add job
 
+AddJob can be safely called on all instances, but the job will be performed only by one. If you want to dynamically send jobs to all instances, use SendJob.
+
 ```
 job := func() {
     fmt.Println("That'll work")
