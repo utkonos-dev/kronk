@@ -3,6 +3,7 @@ package cron
 import (
 	"github.com/robfig/cron/v3"
 	"github.com/utkonos-dev/kronk/scheduler"
+	"strconv"
 )
 
 type Cron struct {
@@ -26,4 +27,14 @@ func (c Cron) AddFunc(spec string, cmd func()) (string, error) {
 	}
 
 	return string(entryID), nil
+}
+
+func (c Cron) Remove(jobID string) error {
+	id, err := strconv.Atoi(jobID)
+	if err != nil {
+		return err
+	}
+
+	c.processor.Remove(cron.EntryID(id))
+	return nil
 }

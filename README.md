@@ -31,7 +31,7 @@ import (
 ```
 
 ```
-k := kronk.NewKronk(
+k := kronk.New(
     natsAdapter.NewMS(natsConn),
     redisAdapter.NewLocker(redisConn),
     cron.NewScheduler(),
