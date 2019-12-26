@@ -21,7 +21,7 @@ So, now you can add jobs and be sure that they will be completed on only one ins
 
 
 ### 2. Create Kronk
-```
+```go
 import (
     "github.com/utkonos-dev/kronk"
     redisAdapter "github.com/utkonos-dev/kronk/dlm/redis"
@@ -30,7 +30,7 @@ import (
 )
 ```
 
-```
+```go
 k := kronk.New(
     natsAdapter.NewMS(natsConn),
     redisAdapter.NewLocker(redisConn),
@@ -45,7 +45,7 @@ k := kronk.New(
 
 ### 3. Start scheduler and sync channel listener
 
-```
+```go
 if err := k.Start(); err != nil {
     // ...
 }
@@ -55,7 +55,7 @@ if err := k.Start(); err != nil {
 
 AddJob can be safely called on all instances, but the job will be performed only by one. If you want to dynamically send job to all instances, use SendJob.
 
-```
+```go
 job := func() {
     fmt.Println("That'll work")
 }
