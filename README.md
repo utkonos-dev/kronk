@@ -2,7 +2,7 @@
 
 ![kronk](https://thumbs.gfycat.com/SpecificEqualCony-size_restricted.gif)
 
-**kronk** is dead-simple scheduler for modern scalable systems. 
+**kronk** is dead simple scheduler for modern scalable systems. 
 
 It allows you to manage background tasks in a distributed architecture. 
 
