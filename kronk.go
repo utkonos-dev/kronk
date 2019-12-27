@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/utkonos-dev/kronk/dlm"
-	"github.com/utkonos-dev/kronk/ems"
 	"github.com/utkonos-dev/kronk/scheduler"
 )
 
@@ -18,44 +17,32 @@ type Kronk struct {
 	jobs sync.Map
 
 	dlm       dlm.DLM
-	ems       ems.MessageSystem
 	scheduler scheduler.Scheduler
 	logger    Logger
 
-	defaultLockExp     time.Duration
-	syncMessageChannel string
+	defaultLockExp time.Duration
 }
 
 type Logger interface {
-	Log(v ...interface{})
-	Logf(format string, v ...interface{})
+	Println(v ...interface{})
+	Printf(format string, v ...interface{})
 }
 
 type Config struct {
-	DefaultLockExp     time.Duration
-	SyncMessageChannel string
+	DefaultLockExp time.Duration
 }
 
-func New(locker dlm.DLM, ms ems.MessageSystem, scheduler scheduler.Scheduler, logger Logger, cfg Config) *Kronk {
+func New(locker dlm.DLM, scheduler scheduler.Scheduler, logger Logger, cfg Config) *Kronk {
 	return &Kronk{
-		dlm:                locker,
-		ems:                ms,
-		scheduler:          scheduler,
-		logger:             logger,
-		defaultLockExp:     cfg.DefaultLockExp,
-		syncMessageChannel: cfg.SyncMessageChannel,
+		dlm:            locker,
+		scheduler:      scheduler,
+		logger:         logger,
+		defaultLockExp: cfg.DefaultLockExp,
 	}
 }
 
-func (k Kronk) Start() error {
-	err := k.ems.Subscribe(k.syncMessageChannel, k.jobSyncHandler)
-	if err != nil {
-		return err
-	}
-
+func (k Kronk) Start() {
 	k.scheduler.Start()
-
-	return nil
 }
 
 func (k Kronk) AddJob(name, cronTab string, job func()) error {
@@ -89,7 +76,7 @@ func (k Kronk) wrapFunc(name string, job func()) func() {
 	return func() {
 		ok, err := k.dlm.Lock(name, k.defaultLockExp)
 		if err != nil {
-			k.logger.Logf("error locking job %s: %s", name, err.Error())
+			k.logger.Printf("error locking job %s: %s", name, err.Error())
 			return
 		}
 
@@ -101,12 +88,8 @@ func (k Kronk) wrapFunc(name string, job func()) func() {
 
 		err = k.dlm.Unlock(name)
 		if err != nil {
-			k.logger.Logf("error unlocking job %s: %s", name, err.Error())
+			k.logger.Printf("error unlocking job %s: %s", name, err.Error())
 			return
 		}
 	}
-}
-
-func (k Kronk) jobSyncHandler(data []byte) error {
-	return nil
 }

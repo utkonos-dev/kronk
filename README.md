@@ -4,13 +4,9 @@
 
 It allows you to manage background tasks in a distributed architecture. 
 
-Already supports [Redis](https://redis.io) and [NATS](https://nats.io) as distributed lock manager and message system.
+Already supports [Redis](https://redis.io) as distributed lock manager.
 
-#### Roadmap
-- ☑️ Job scheduler and locker
-- Job managing across all instances
-
-So, now you can add jobs and be sure that they will be completed on only one instance. Distributed job managing is in progress.
+So, now you can add jobs and be sure that they will be completed on only one instance.
 
 ## Get started
 ### 1. Install and import package
@@ -23,35 +19,30 @@ So, now you can add jobs and be sure that they will be completed on only one ins
 import (
     "github.com/utkonos-dev/kronk"
     redisAdapter "github.com/utkonos-dev/kronk/dlm/redis"
-    natsAdapter "github.com/utkonos-dev/kronk/ems/nats"
     "github.com/utkonos-dev/kronk/scheduler/cron"
 )
 ```
 
 ```go
 k := kronk.New(
-    natsAdapter.NewMS(natsConn),
     redisAdapter.NewLocker(redisConn),
     cron.NewScheduler(),
     logger,
     kronk.Config{
         DefaultLockExp:     time.Second,
-        SyncMessageChannel: "sync-kronk",
     },
 )
 ```
 
-### 3. Start scheduler and sync channel listener
+### 3. Start scheduler
 
 ```go
-if err := k.Start(); err != nil {
-    // ...
-}
+k.Start()
 ```
 
 ### 4. Add job
 
-AddJob can be safely called on all instances, but the job will be performed only by one. If you want to dynamically send job to all instances, use SendJob.
+AddJob can be safely called on all instances, but the job will be performed only by one.
 
 ```go
 job := func() {
