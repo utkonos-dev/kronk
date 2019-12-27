@@ -1,4 +1,4 @@
-# kronk
+# kronk [![GoDoc](https://godoc.org/github.com/utkonos-dev/kronk?status.svg)](https://godoc.org/github.com/utkonos-dev/kronk)
 
 **kronk** is dead simple scheduler for modern scalable systems. 
 
