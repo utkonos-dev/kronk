@@ -81,6 +81,8 @@ func (k Kronk) RemoveJob(name string) error {
 	}
 
 	k.jobs.Delete(jobID)
+
+	return nil
 }
 
 func (k Kronk) wrapFunc(name string, job func()) func() {
