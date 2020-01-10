@@ -49,7 +49,7 @@ job := func() {
     fmt.Println("That'll work")
 }
 
-err := k.AddJob("kronksays", "* * * * *", job)
+err := k.AddRegularJob("kronksays", "* * * * *", job)
 if err != nil {
     // ...
 }
