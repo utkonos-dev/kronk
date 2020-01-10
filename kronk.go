@@ -85,7 +85,7 @@ func (k Kronk) RemoveJob(name string) error {
 
 		k.jobs.Delete(job)
 	} else {
-		job.(time.Timer).Stop()
+		job.(*time.Timer).Stop()
 	}
 
 	return nil
