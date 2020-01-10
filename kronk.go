@@ -2,6 +2,7 @@ package kronk
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 	"time"
 
@@ -45,7 +46,7 @@ func (k Kronk) Start() {
 	k.scheduler.Start()
 }
 
-func (k Kronk) AddJob(name, cronTab string, job func()) error {
+func (k Kronk) AddRegularJob(name, cronTab string, job func()) error {
 	jobID, err := k.scheduler.AddFunc(cronTab, k.wrapFunc(name, job))
 	if err != nil {
 		return err
@@ -56,18 +57,36 @@ func (k Kronk) AddJob(name, cronTab string, job func()) error {
 	return err
 }
 
+func (k Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
+	timer := time.NewTimer(time.Duration(runAt.Nanosecond() - time.Now().Nanosecond()))
+	go func() {
+		<-timer.C
+		k.wrapFunc(name, job)()
+	}()
+
+	k.jobs.Store(name, timer)
+}
+
 func (k Kronk) RemoveJob(name string) error {
-	jobID, ok := k.jobs.Load(name)
+	job, ok := k.jobs.Load(name)
 	if !ok {
 		return ErrJobNotFound
 	}
 
-	err := k.scheduler.Remove(jobID.(string))
-	if err != nil {
-		return err
-	}
+	v := reflect.ValueOf(job)
 
-	k.jobs.Delete(jobID)
+	// If job is regular, remove it from scheduler.
+	// Otherwise, stop timer.
+	if v.Kind() == reflect.String {
+		err := k.scheduler.Remove(job.(string))
+		if err != nil {
+			return err
+		}
+
+		k.jobs.Delete(job)
+	} else {
+		job.(time.Timer).Stop()
+	}
 
 	return nil
 }
