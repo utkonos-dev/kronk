@@ -58,7 +58,13 @@ func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
 }
 
 func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
-	timer := time.NewTimer(time.Duration(runAt.Nanosecond() - time.Now().Nanosecond()))
+	now := time.Now()
+
+	if runAt.Before(now) {
+		return
+	}
+
+	timer := time.NewTimer(runAt.Sub(now))
 	go func() {
 		<-timer.C
 		k.wrapFunc(name, job)()
