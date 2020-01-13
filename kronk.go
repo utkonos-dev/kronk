@@ -72,6 +72,8 @@ func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) error {
 	}()
 
 	k.jobs.Store(name, timer)
+
+	return nil
 }
 
 func (k *Kronk) RemoveJob(name string) error {
