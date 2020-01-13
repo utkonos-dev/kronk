@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrJobNotFound = errors.New("job not found")
+	ErrExpiredJob  = errors.New("expired job")
 )
 
 type Kronk struct {
@@ -57,11 +58,11 @@ func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
 	return err
 }
 
-func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
+func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) error {
 	now := time.Now()
 
 	if runAt.Before(now) {
-		return
+		return ErrExpiredJob
 	}
 
 	timer := time.NewTimer(runAt.Sub(now))
