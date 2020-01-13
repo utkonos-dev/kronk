@@ -42,11 +42,11 @@ func New(locker dlm.DLM, scheduler scheduler.Scheduler, logger Logger, cfg Confi
 	}
 }
 
-func (k Kronk) Start() {
+func (k *Kronk) Start() {
 	k.scheduler.Start()
 }
 
-func (k Kronk) AddRegularJob(name, cronTab string, job func()) error {
+func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
 	jobID, err := k.scheduler.AddFunc(cronTab, k.wrapFunc(name, job))
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (k Kronk) AddRegularJob(name, cronTab string, job func()) error {
 	return err
 }
 
-func (k Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
+func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
 	timer := time.NewTimer(time.Duration(runAt.Nanosecond() - time.Now().Nanosecond()))
 	go func() {
 		<-timer.C
@@ -67,7 +67,7 @@ func (k Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) {
 	k.jobs.Store(name, timer)
 }
 
-func (k Kronk) RemoveJob(name string) error {
+func (k *Kronk) RemoveJob(name string) error {
 	job, ok := k.jobs.Load(name)
 	if !ok {
 		return ErrJobNotFound
@@ -91,7 +91,7 @@ func (k Kronk) RemoveJob(name string) error {
 	return nil
 }
 
-func (k Kronk) wrapFunc(name string, job func()) func() {
+func (k *Kronk) wrapFunc(name string, job func()) func() {
 	return func() {
 		ok, err := k.dlm.Lock(name, k.defaultLockExp)
 		if err != nil {
