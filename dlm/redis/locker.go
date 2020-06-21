@@ -9,10 +9,10 @@ import (
 )
 
 type redLocker struct {
-	cache *redis.Client
+	cache redis.UniversalClient
 }
 
-func NewLocker(client *redis.Client) dlm.DLM {
+func NewLocker(client redis.UniversalClient) dlm.DLM {
 	return &redLocker{cache: client}
 }
 
