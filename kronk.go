@@ -23,6 +23,7 @@ type Kronk struct {
 	logger    Logger
 
 	defaultLockExp time.Duration
+	skipDuplicate  bool
 }
 
 type Logger interface {
@@ -32,6 +33,7 @@ type Logger interface {
 
 type Config struct {
 	DefaultLockExp time.Duration
+	SkipDuplicate  bool
 }
 
 func New(locker dlm.DLM, scheduler scheduler.Scheduler, logger Logger, cfg Config) *Kronk {
@@ -40,6 +42,7 @@ func New(locker dlm.DLM, scheduler scheduler.Scheduler, logger Logger, cfg Confi
 		scheduler:      scheduler,
 		logger:         logger,
 		defaultLockExp: cfg.DefaultLockExp,
+		skipDuplicate:  cfg.SkipDuplicate,
 	}
 }
 
@@ -48,6 +51,12 @@ func (k *Kronk) Start() {
 }
 
 func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
+	if k.skipDuplicate {
+		if _, ok := k.jobs.Load(name); ok {
+			return nil
+		}
+	}
+
 	jobID, err := k.scheduler.AddFunc(cronTab, k.wrapFunc(name, job))
 	if err != nil {
 		return err
@@ -59,6 +68,12 @@ func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
 }
 
 func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) error {
+	if k.skipDuplicate {
+		if _, ok := k.jobs.Load(name); ok {
+			return nil
+		}
+	}
+
 	now := time.Now()
 
 	if runAt.Before(now) {
