@@ -50,6 +50,10 @@ func (k *Kronk) Start() {
 	k.scheduler.Start()
 }
 
+func (k *Kronk) Scheduler() scheduler.Scheduler {
+	return k.scheduler
+}
+
 func (k *Kronk) AddRegularJob(name, cronTab string, job func()) error {
 	if k.skipDuplicate {
 		if _, ok := k.jobs.Load(name); ok {
