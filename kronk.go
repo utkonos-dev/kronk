@@ -88,6 +88,7 @@ func (k *Kronk) AddOneTimeJob(name string, runAt time.Time, job func()) error {
 	go func() {
 		<-timer.C
 		k.wrapFunc(name, job)()
+		k.jobs.Delete(name)
 	}()
 
 	k.jobs.Store(name, timer)
