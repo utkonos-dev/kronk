@@ -26,7 +26,7 @@ func (c Cron) AddFunc(spec string, cmd func()) (string, error) {
 		return "", nil
 	}
 
-	return string(entryID), nil
+	return strconv.Itoa(int(entryID)), nil
 }
 
 func (c Cron) Remove(jobID string) error {
